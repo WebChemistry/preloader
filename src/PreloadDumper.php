@@ -10,6 +10,8 @@ use Stringable;
 final class PreloadDumper
 {
 
+	public PreloadPatterns $patterns;
+
 	/** @var array<class-string, string> */
 	private array $classMap;
 
@@ -25,6 +27,7 @@ final class PreloadDumper
 		$classMap = $loader->getClassMap();
 
 		$this->classMap = $classMap;
+		$this->patterns = new PreloadPatterns();
 	}
 
 	public function addLegacyFile(string $file): void

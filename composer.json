@@ -1,0 +1,15 @@
+{
+    "name": "webchemistry/preloader",
+    "require": {
+        "php": ">= 8.2",
+        "nette/utils": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "WebChemistry\\Preloader\\": "src"
+        }
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.9"
+    }
+}

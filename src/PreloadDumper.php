@@ -85,7 +85,7 @@ final class PreloadDumper
 		if (preg_match_all('#^use ([a-zA-Z\\\\0-9_]+)(?:\s+as\s+[a-zA-Z\\\\0-9_]+)?;#m', FileSystem::read((string) $file), $matches)) {
 			/** @var class-string $class */
 			foreach ($matches[1] as $class) {
-				$this->classes[$class] = $class;
+				$this->preloadClass($class);
 			}
 		}
 

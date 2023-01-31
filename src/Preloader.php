@@ -3,6 +3,7 @@
 namespace WebChemistry\Preloader;
 
 use Composer\Autoload\ClassLoader;
+use LogicException;
 use Nette\Utils\FileSystem;
 use Nette\Utils\Json;
 
@@ -43,6 +44,10 @@ final class Preloader
 
 		foreach ($classes as $class) {
 			$file = $this->classMap[$class] ?? null;
+
+			if ($file === null) {
+				throw new LogicException(sprintf('Class %s is not in composer.', $class));
+			}
 
 			include_once $file;
 		}

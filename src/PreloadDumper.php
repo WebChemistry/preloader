@@ -33,9 +33,21 @@ final class PreloadDumper
 		$this->patterns = new PreloadPatterns();
 	}
 
-	public function addCompileFileFromPath(string $file): void
+	public function addCompileFileFromPath(string|Stringable $file): void
 	{
+		$file = (string) $file;
+
 		$this->files[$file] = $file;
+	}
+
+	/**
+	 * @param array<string|Stringable> $files
+	 */
+	public function addCompileFilesFromPath(iterable $files): void
+	{
+		foreach ($files as $file) {
+			$this->addCompileFileFromPath((string) $file);
+		}
 	}
 
 	public function addLegacyFile(string $file): void

@@ -43,6 +43,10 @@ final class Preloader
 		}
 
 		foreach ($classes as $class) {
+			if (class_exists($class, false)) {
+				continue;
+			}
+
 			$file = $this->classMap[$class] ?? null;
 
 			if ($file === null) {

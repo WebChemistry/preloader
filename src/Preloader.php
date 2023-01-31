@@ -13,13 +13,14 @@ final class Preloader
 	/** @var string[] */
 	private array $classMap;
 
+	/** @var mixed[] */
+	private array $map;
+
 	public function __construct(
 		ClassLoader $classLoader,
 		private string $jsonFile,
 	)
 	{
-		$this->checkEnvironment();
-
 		$this->classMap = $classLoader->getClassMap();
 		$map = Json::decode(FileSystem::read($this->jsonFile), Json::FORCE_ARRAY);
 
@@ -27,16 +28,22 @@ final class Preloader
 			$this->invalidJson();
 		}
 
-		$this->loadClasses($map);
-		$this->loadFiles($map);
+		$this->map = $map;
+	}
+
+	public function preload(): void
+	{
+		$this->loadClasses();
+		$this->loadFiles();
+		$this->loadCompiles();
 	}
 
 	/**
 	 * @param mixed[] $map
 	 */
-	private function loadClasses(array $map): void
+	private function loadClasses(): void
 	{
-		$classes = $map['classes'] ?? null;
+		$classes = $this->map['classes'] ?? null;
 
 		if (!is_array($classes)) {
 			$this->invalidJson();
@@ -56,16 +63,16 @@ final class Preloader
 	/**
 	 * @param mixed[] $map
 	 */
-	private function loadFiles(array $map): void
+	private function loadCompiles(): void
 	{
-		$files = $map['files'] ?? null;
+		$compile = $this->map['compile'] ?? null;
 
-		if (!is_array($files)) {
+		if (!is_array($compile)) {
 			$this->invalidJson();
 		}
 
 		/** @var string $file */
-		foreach ($files as $file) {
+		foreach ($compile as $file) {
 			opcache_compile_file($file);
 		}
 	}
@@ -77,7 +84,21 @@ final class Preloader
 		die(1);
 	}
 
-	private function checkEnvironment(): void
+	private function loadFiles(): void
+	{
+		$files = $this->map['files'] ?? null;
+
+		if (!is_array($files)) {
+			$this->invalidJson();
+		}
+
+		/** @var string $file */
+		foreach ($files as $file) {
+			include_once $file;
+		}
+	}
+
+	public function checkEnvironment(): void
 	{
 		if (!ini_get('opcache.enable')) {
 			echo 'Opcache is not available.';

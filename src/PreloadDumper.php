@@ -22,6 +22,9 @@ final class PreloadDumper
 	private array $classes = [];
 
 	/** @var array<string, string> */
+	private array $compile = [];
+
+	/** @var array<string, string> */
 	private array $files = [];
 
 	public function __construct(ClassLoader $loader)
@@ -33,7 +36,7 @@ final class PreloadDumper
 		$this->patterns = new PreloadPatterns();
 	}
 
-	public function addCompileFileFromPath(string|Stringable $file): void
+	public function addFile(string|Stringable $file): void
 	{
 		$file = (string) $file;
 
@@ -41,16 +44,33 @@ final class PreloadDumper
 	}
 
 	/**
-	 * @param array<string|Stringable> $files
+	 * @param iterable<string|Stringable> $files
 	 */
-	public function addCompileFilesFromPath(iterable $files): void
+	public function addFiles(iterable $files): void
 	{
 		foreach ($files as $file) {
-			$this->addCompileFileFromPath((string) $file);
+			$this->addFile((string) $file);
 		}
 	}
 
-	public function addLegacyFile(string $file): void
+	public function addCompileFromPath(string|Stringable $file): void
+	{
+		$file = (string) $file;
+
+		$this->compile[$file] = $file;
+	}
+
+	/**
+	 * @param array<string|Stringable> $files
+	 */
+	public function addCompileFromPaths(iterable $files): void
+	{
+		foreach ($files as $file) {
+			$this->addCompileFromPath((string) $file);
+		}
+	}
+
+	public function exportClassesFromFile(string $file): void
 	{
 		$contents = FileSystem::read($file);
 
@@ -79,10 +99,10 @@ final class PreloadDumper
 	/**
 	 * @param iterable<string|Stringable> $files
 	 */
-	public function addFiles(iterable $files): self
+	public function exportUseStatementsFromFiles(iterable $files): self
 	{
 		foreach ($files as $file) {
-			$this->addFile((string) $file);
+			$this->exportUseStatementsFromFile((string) $file);
 		}
 
 		return $this;
@@ -91,16 +111,16 @@ final class PreloadDumper
 	/**
 	 * @param iterable<string|Stringable> $files
 	 */
-	public function addLegacyFiles(iterable $files): self
+	public function exportClassesFromFiles(iterable $files): self
 	{
 		foreach ($files as $file) {
-			$this->addLegacyFile((string) $file);
+			$this->exportClassesFromFile((string) $file);
 		}
 
 		return $this;
 	}
 
-	public function addFile(string|Stringable $file): self
+	public function exportUseStatementsFromFile(string|Stringable $file): self
 	{
 		if (preg_match_all('#^use ([a-zA-Z\\\\0-9_]+)(?:\s+as\s+[a-zA-Z\\\\0-9_]+)?;#m', FileSystem::read((string) $file), $matches)) {
 			/** @var class-string $class */
@@ -161,6 +181,7 @@ final class PreloadDumper
 		FileSystem::write($location, Json::encode([
 			'classes' => $this->getClasses(),
 			'files' => array_values($this->files),
+			'compile' => array_values($this->compile),
 		], Json::PRETTY));
 	}
 

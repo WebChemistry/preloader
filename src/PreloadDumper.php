@@ -21,6 +21,9 @@ final class PreloadDumper
 	/** @var array<class-string, class-string> */
 	private array $classes = [];
 
+	/** @var array<string, string> */
+	private array $files = [];
+
 	public function __construct(ClassLoader $loader)
 	{
 		/** @var array<class-string, string> $classMap */
@@ -28,6 +31,11 @@ final class PreloadDumper
 
 		$this->classMap = $classMap;
 		$this->patterns = new PreloadPatterns();
+	}
+
+	public function addCompileFileFromPath(string $file): void
+	{
+		$this->files[$file] = $file;
 	}
 
 	public function addLegacyFile(string $file): void
@@ -140,6 +148,7 @@ final class PreloadDumper
 	{
 		FileSystem::write($location, Json::encode([
 			'classes' => $this->getClasses(),
+			'files' => array_values($this->files),
 		], Json::PRETTY));
 	}
 

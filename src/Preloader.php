@@ -31,11 +31,15 @@ final class Preloader
 		$this->map = $map;
 	}
 
-	public function preload(): void
+	public function preload(): float
 	{
+		$timer = microtime(true);
+
 		$this->loadClasses();
 		$this->loadFiles();
 		$this->loadCompiles();
+
+		return microtime(true) - $timer;
 	}
 
 	/**

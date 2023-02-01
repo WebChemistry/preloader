@@ -31,13 +31,16 @@ final class Preloader
 		$this->map = $map;
 	}
 
-	public function preload(): float
+	public function preload(bool $onlyInclude = false): float
 	{
 		$timer = microtime(true);
 
 		$this->loadClasses();
 		$this->loadFiles();
-		$this->loadCompiles();
+
+		if (!$onlyInclude) {
+			$this->loadCompiles();
+		}
 
 		return microtime(true) - $timer;
 	}

@@ -1,7 +1,7 @@
 {
     "name": "webchemistry/preloader",
     "require": {
-        "php": ">= 8.2",
+        "php": ">= 8.1",
         "nette/utils": "^3.2"
     },
     "autoload": {

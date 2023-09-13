@@ -31,24 +31,30 @@ final class Preloader
 		$this->map = $map;
 	}
 
-	public function preload(bool $onlyInclude = false): float
+	/**
+	 * @return array{time: float, classes: int, files: int, compiles: int}
+	 */
+	public function preload(bool $onlyInclude = false): array
 	{
 		$timer = microtime(true);
 
-		$this->loadClasses();
-		$this->loadFiles();
+		$classes = $this->loadClasses();
+		$files = $this->loadFiles();
+		$compiles = 0;
 
 		if (!$onlyInclude) {
-			$this->loadCompiles();
+			$compiles = $this->loadCompiles();
 		}
 
-		return microtime(true) - $timer;
+		return [
+			'time' => microtime(true) - $timer,
+			'classes' => $classes,
+			'files' => $files,
+			'compiles' => $compiles,
+		];
 	}
 
-	/**
-	 * @param mixed[] $map
-	 */
-	private function loadClasses(): void
+	private function loadClasses(): int
 	{
 		$classes = $this->map['classes'] ?? null;
 
@@ -65,12 +71,11 @@ final class Preloader
 
 			require_once $file;
 		}
+
+		return count($classes);
 	}
 
-	/**
-	 * @param mixed[] $map
-	 */
-	private function loadCompiles(): void
+	private function loadCompiles(): int
 	{
 		$compile = $this->map['compile'] ?? null;
 
@@ -82,6 +87,8 @@ final class Preloader
 		foreach ($compile as $file) {
 			opcache_compile_file($file);
 		}
+
+		return count($compile);
 	}
 
 	private function invalidJson(): never
@@ -91,7 +98,7 @@ final class Preloader
 		die(1);
 	}
 
-	private function loadFiles(): void
+	private function loadFiles(): int
 	{
 		$files = $this->map['files'] ?? null;
 
@@ -103,6 +110,8 @@ final class Preloader
 		foreach ($files as $file) {
 			include_once $file;
 		}
+
+		return count($files);
 	}
 
 	public function checkEnvironment(): void
